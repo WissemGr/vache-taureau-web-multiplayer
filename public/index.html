@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐄🐂 Vache et Taureau Multijoueur</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Écran d'accueil -->
+        <div id="welcome-screen" class="screen active">
+            <div class="welcome-card">
+                <h1>🐄🐂 Vache et Taureau</h1>
+                <h2>Multijoueur Compétitif</h2>
+                <p>Soyez le premier à deviner le nombre secret de 4 chiffres !</p>
+                
+                <div class="rules">
+                    <h3>📋 Règles du jeu :</h3>
+                    <ul>
+                        <li><strong>🐂 Taureau :</strong> Chiffre correct à la bonne position</li>
+                        <li><strong>🐄 Vache :</strong> Chiffre correct mais à la mauvaise position</li>
+                        <li><strong>🎯 Objectif :</strong> Trouvez le nombre en moins de tentatives</li>
+                        <li><strong>👥 Multijoueur :</strong> Jusqu'à 4 joueurs par partie</li>
+                    </ul>
+                </div>
+
+                <div class="join-form">
+                    <input type="text" id="player-name" placeholder="Votre nom" maxlength="20" required>
+                    <input type="text" id="room-id" placeholder="Code de la room (optionnel)" maxlength="10">
+                    <button id="join-btn" class="btn-primary">
+                        <i class="fas fa-play"></i> Rejoindre la partie
+                    </button>
+                    <button id="create-room-btn" class="btn-secondary">
+                        <i class="fas fa-plus"></i> Créer une nouvelle room
+                    </button>
+                </div>
+
+                <div class="stats">
+                    <div id="server-stats">
+                        <i class="fas fa-server"></i> Connexion...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Écran de lobby -->
+        <div id="lobby-screen" class="screen">
+            <div class="lobby-card">
+                <h2>🏠 Lobby - Room <span id="current-room-id"></span></h2>
+                
+                <div class="room-info">
+                    <div class="players-list">
+                        <h3>👥 Joueurs connectés :</h3>
+                        <div id="players-container"></div>
+                    </div>
+                    
+                    <div class="lobby-actions">
+                        <button id="start-game-btn" class="btn-primary" disabled>
+                            <i class="fas fa-rocket"></i> Commencer la partie
+                        </button>
+                        <button id="leave-room-btn" class="btn-secondary">
+                            <i class="fas fa-door-open"></i> Quitter la room
+                        </button>
+                    </div>
+                </div>
+
+                <div class="room-link">
+                    <p>🔗 Partagez ce lien avec vos amis :</p>
+                    <div class="link-container">
+                        <input type="text" id="room-link" readonly>
+                        <button id="copy-link-btn" class="btn-copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Écran de jeu -->
+        <div id="game-screen" class="screen">
+            <div class="game-container">
+                <!-- Header avec infos de la partie -->
+                <div class="game-header">
+                    <div class="game-info">
+                        <h2>🎮 Partie en cours - Room <span id="game-room-id"></span></h2>
+                        <div class="timer">
+                            <i class="fas fa-clock"></i> <span id="game-timer">00:00</span>
+                        </div>
+                    </div>
+                    <button id="quit-game-btn" class="btn-danger">
+                        <i class="fas fa-times"></i> Quitter
+                    </button>
+                </div>
+
+                <!-- Zone de jeu principale -->
+                <div class="game-main">
+                    <!-- Panneau de saisie -->
+                    <div class="input-panel">
+                        <h3>🎯 Votre tentative :</h3>
+                        <div class="guess-input">
+                            <input type="text" id="guess-input" placeholder="0000" maxlength="4" pattern="[0-9]{4}">
+                            <button id="submit-guess-btn" class="btn-primary">
+                                <i class="fas fa-paper-plane"></i> Envoyer
+                            </button>
+                        </div>
+                        <div id="input-feedback" class="feedback"></div>
+                    </div>
+
+                    <!-- Historique des tentatives -->
+                    <div class="attempts-panel">
+                        <h3>📊 Vos tentatives :</h3>
+                        <div id="attempts-list" class="attempts-list"></div>
+                    </div>
+                </div>
+
+                <!-- Sidebar avec les autres joueurs -->
+                <div class="players-sidebar">
+                    <h3>👥 Autres joueurs :</h3>
+                    <div id="game-players-list" class="game-players-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Écran de fin de partie -->
+        <div id="end-screen" class="screen">
+            <div class="end-card">
+                <div id="victory-content" class="end-content">
+                    <h2>🎉 Partie terminée !</h2>
+                    <div id="winner-announcement"></div>
+                    
+                    <div class="final-results">
+                        <h3>🏆 Classement final :</h3>
+                        <div id="final-leaderboard"></div>
+                    </div>
+
+                    <div class="secret-reveal">
+                        <p>🔐 Le nombre secret était : <span id="revealed-secret"></span></p>
+                    </div>
+
+                    <div class="end-actions">
+                        <button id="play-again-btn" class="btn-primary">
+                            <i class="fas fa-redo"></i> Rejouer
+                        </button>
+                        <button id="new-room-btn" class="btn-secondary">
+                            <i class="fas fa-plus"></i> Nouvelle room
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages toast -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/game.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>
