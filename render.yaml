@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: vache-taureau-multiplayer
+    runtime: node
+    plan: free
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MAX_PLAYERS_PER_ROOM
+        value: 8
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: PORT
+        value: 10000
