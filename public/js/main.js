@@ -12,6 +12,9 @@ class App {
       // Vérifier le support du navigateur
       this.checkBrowserSupport();
       
+      // Vérifier et restaurer la session
+      this.checkSession();
+      
       // Initialiser les composants
       await this.initializeComponents();
       
@@ -24,6 +27,37 @@ class App {
     } catch (error) {
       console.error('❌ Erreur lors de l\'initialisation:', error);
       this.showInitializationError(error);
+    }
+  }
+
+  checkSession() {
+    try {
+      if (window.sessionManager && window.sessionManager.hasActiveSession()) {
+        const playerInfo = window.sessionManager.getPlayerInfo();
+        
+        // Vérifier si la session n'est pas expirée
+        if (window.sessionManager.isSessionExpired()) {
+          console.log('⏰ Session expirée, effacement...');
+          window.sessionManager.clearSession();
+          return;
+        }
+        
+        console.log('🔄 Session trouvée:', playerInfo);
+        
+        // Pré-remplir le nom du joueur
+        const playerNameInput = document.getElementById('player-name');
+        if (playerNameInput && playerInfo.name) {
+          playerNameInput.value = playerInfo.name;
+        }
+        
+        // Afficher un message de restauration
+        setTimeout(() => {
+          UI.showToast(`👋 Bon retour ${playerInfo.name} !`, 'info');
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la vérification de session:', error);
+      window.sessionManager.clearSession();
     }
   }
 

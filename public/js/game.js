@@ -29,6 +29,9 @@ class VacheTaureauClient {
       this.isConnected = true;
       this.updateServerStats();
       UI.showToast('Connecté au serveur', 'success');
+      
+      // Tentative de reconnexion automatique si session active
+      this.attemptSessionReconnection();
     });
 
     this.socket.on('disconnect', () => {
@@ -165,6 +168,12 @@ class VacheTaureauClient {
     this.playerName = playerName;
     this.currentRoom = roomId;
 
+    // Sauvegarder dans la session
+    if (window.sessionManager) {
+      window.sessionManager.updatePlayerName(playerName);
+      window.sessionManager.updateRoomInfo(roomId);
+    }
+
     this.socket.emit('join-room', { roomId, playerName });
     
     // Passer au lobby
@@ -191,6 +200,11 @@ class VacheTaureauClient {
     if (this.socket) {
       this.socket.disconnect();
       this.socket.connect();
+    }
+    
+    // Nettoyer la session
+    if (window.sessionManager) {
+      window.sessionManager.clearSession();
     }
     
     this.currentRoom = null;
@@ -591,6 +605,78 @@ class VacheTaureauClient {
     } else {
       statsElement.innerHTML = '<i class="fas fa-circle" style="color: #e74c3c;"></i> Connexion...';
     }
+  }
+
+  /**
+   * Tentative de reconnexion automatique basée sur la session
+   */
+  attemptSessionReconnection() {
+    if (!window.sessionManager || !window.sessionManager.hasActiveSession()) {
+      return;
+    }
+
+    const playerInfo = window.sessionManager.getPlayerInfo();
+    
+    // Vérifier si la session n'est pas expirée
+    if (window.sessionManager.isSessionExpired()) {
+      console.log('⏰ Session expirée lors de la reconnexion');
+      window.sessionManager.clearSession();
+      return;
+    }
+
+    console.log('🔄 Tentative de reconnexion automatique:', playerInfo);
+    
+    setTimeout(() => {
+      // Pré-remplir les champs si on est sur l'écran d'accueil
+      const currentScreen = document.querySelector('.screen.active');
+      if (currentScreen && currentScreen.id === 'welcome-screen') {
+        const playerNameInput = document.getElementById('player-name');
+        const roomIdInput = document.getElementById('room-id');
+        
+        if (playerNameInput && !playerNameInput.value) {
+          playerNameInput.value = playerInfo.name || '';
+        }
+        if (roomIdInput && !roomIdInput.value) {
+          roomIdInput.value = playerInfo.roomId || '';
+        }
+        
+        // Afficher un message de reconnexion
+        UI.showToast('📱 Session restaurée - cliquez sur Rejoindre pour continuer', 'info');
+      }
+    }, 500);
+  }
+
+  /**
+   * Quitter proprement la partie et nettoyer la session
+   */
+  leaveGame() {
+    if (this.currentRoom) {
+      this.socket.emit('leave-room', { roomId: this.currentRoom });
+    }
+    
+    // Nettoyer la session
+    if (window.sessionManager) {
+      window.sessionManager.clearSession();
+    }
+    
+    // Retourner à l'écran d'accueil
+    this.resetGame();
+    UI.showScreen('welcome-screen');
+    UI.showToast('Vous avez quitté la partie', 'info');
+  }
+
+  /**
+   * Réinitialiser l'état du jeu
+   */
+  resetGame() {
+    this.playerName = '';
+    this.currentRoom = '';
+    this.gameState = null;
+    this.isGameStarted = false;
+    
+    // Réinitialiser les champs
+    document.getElementById('player-name').value = '';
+    document.getElementById('room-id').value = '';
   }
 }
 
