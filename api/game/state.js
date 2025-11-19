@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Room ID is required' });
     }
 
-    const room = store.getRoom(roomId);
+    const room = await store.getRoom(roomId);
     if (!room || !room.gameInstance) {
       return res.status(404).json({ error: 'Room not found' });
     }

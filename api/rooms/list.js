@@ -15,9 +15,9 @@ module.exports = async (req, res) => {
 
   try {
     // Cleanup old rooms
-    store.cleanup();
+    await store.cleanup();
 
-    const allRooms = store.getAllRooms();
+    const allRooms = await store.getAllRooms();
     const rooms = allRooms.map(room => ({
       id: room.id,
       playerCount: room.gameInstance ? room.gameInstance.players.size : 0,

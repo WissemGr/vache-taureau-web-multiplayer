@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Room ID, player ID, and guess are required' });
     }
 
-    const room = store.getRoom(roomId);
+    const room = await store.getRoom(roomId);
     if (!room || !room.gameInstance) {
       return res.status(404).json({ error: 'Room not found' });
     }
@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
     const result = room.gameInstance.makeGuess(playerId, guess);
 
     // Update room state
-    store.updateRoom(roomId, {
+    await store.updateRoom(roomId, {
       game: room.gameInstance.getGameState()
     });
 

@@ -34,13 +34,13 @@ module.exports = async (req, res) => {
     }
 
     // Store game state
-    store.createRoom(roomId, {
+    await store.createRoom(roomId, {
       game: game.getGameState(),
       gameInstance: game // Store instance for server-side use
     });
 
     // Store player info
-    store.addPlayer(playerId, {
+    await store.addPlayer(playerId, {
       name: playerName.trim(),
       roomId: roomId
     });

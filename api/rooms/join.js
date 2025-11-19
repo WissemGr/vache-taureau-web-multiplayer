@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Room ID and player name are required' });
     }
 
-    const room = store.getRoom(roomId);
+    const room = await store.getRoom(roomId);
     if (!room || !room.gameInstance) {
       return res.status(404).json({ error: 'Room not found' });
     }
@@ -34,12 +34,12 @@ module.exports = async (req, res) => {
     }
 
     // Update room state
-    store.updateRoom(roomId, {
+    await store.updateRoom(roomId, {
       game: room.gameInstance.getGameState()
     });
 
     // Store player info
-    store.addPlayer(playerId, {
+    await store.addPlayer(playerId, {
       name: playerName.trim(),
       roomId: roomId
     });
