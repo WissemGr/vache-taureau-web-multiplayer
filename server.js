@@ -130,10 +130,10 @@ class VacheTaureauGame {
   calculateBullsAndCows(guess) {
     let bulls = 0;
     let cows = 0;
-    
+
     const secretDigits = this.secretNumber.split('');
     const guessDigits = guess.split('');
-    
+
     // Calculer les taureaux (bulls)
     for (let i = 0; i < 4; i++) {
       if (secretDigits[i] === guessDigits[i]) {
@@ -142,7 +142,7 @@ class VacheTaureauGame {
         guessDigits[i] = 'Y'; // Marquer comme utilisé
       }
     }
-    
+
     // Calculer les vaches (cows)
     for (let i = 0; i < 4; i++) {
       if (guessDigits[i] !== 'Y') { // Si pas déjà utilisé pour un bull
@@ -153,11 +153,15 @@ class VacheTaureauGame {
         }
       }
     }
-    
-    return { cows, bulls };
+
+    return { bulls, cows };
   }
 
   makeGuess(playerId, guess) {
+    if (!this.gameStarted) {
+      return { success: false, message: "La partie n'a pas encore commencé" };
+    }
+
     if (this.gameEnded) {
       return { success: false, message: "La partie est terminée" };
     }
@@ -176,7 +180,7 @@ class VacheTaureauGame {
       return { success: false, message: validation.message };
     }
 
-    const { cows, bulls } = this.calculateBullsAndCows(guess);
+    const { bulls, cows } = this.calculateBullsAndCows(guess);
     const attemptNumber = player.attempts.length + 1;
     
     const attempt = {
