@@ -342,3 +342,4 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 ---
 
 🎮 **Amusez-vous bien !** Que le meilleur gagne ! 🏆
+# trigger
