@@ -4,4 +4,8 @@ node_modules
 .env
 *.log
 test.js
+test-*.js
+**/*.test.js
+coverage/
+.coverage/
 .DS_Store
