@@ -42,6 +42,24 @@ class VacheTaureauClient {
       UI.showToast('Connexion perdue', 'error');
     });
 
+    // Polling handler for game state updates
+    this.socket.on('gameStateUpdate', (gameState) => {
+      if (gameState) {
+        this.updateGameState(gameState);
+
+        // Check if game just started
+        if (gameState.gameStarted && !this.gameState?.gameStarted) {
+          UI.showToast('🚀 La partie commence !', 'success');
+          this.startGame();
+        }
+
+        // Check if game ended
+        if (gameState.gameEnded && !this.gameState?.gameEnded) {
+          this.endGame();
+        }
+      }
+    });
+
     this.socket.on('error', (message) => {
       console.error('❌ Erreur:', message);
       UI.showToast(message, 'error');
@@ -246,15 +264,27 @@ class VacheTaureauClient {
   }
 
   // Gestion du jeu
-  startGameRequest() {
+  async startGameRequest() {
     console.log('🚀 BOUTON CLICKÉ: Tentative de démarrage de la partie...');
     console.log('🚀 État actuel:', {
       gameState: this.gameState,
       currentRoom: this.currentRoom,
       socketConnected: this.socket.connected
     });
-    this.socket.emit('start-game');
-    console.log('🚀 Événement start-game envoyé au serveur');
+
+    try {
+      const result = await this.socket.startGame();
+      console.log('🚀 Résultat:', result);
+
+      if (result.success) {
+        UI.showToast('Partie démarrée !', 'success');
+      } else {
+        UI.showToast(result.message || 'Erreur lors du démarrage', 'error');
+      }
+    } catch (error) {
+      console.error('Error starting game:', error);
+      UI.showToast('Erreur: ' + error.message, 'error');
+    }
   }
 
   startGame() {
@@ -273,7 +303,7 @@ class VacheTaureauClient {
     this.clearFeedback();
   }
 
-  submitGuess() {
+  async submitGuess() {
     const guessInput = document.getElementById('guess-input');
     const guess = guessInput.value.trim();
 
@@ -285,16 +315,25 @@ class VacheTaureauClient {
     const submitBtn = document.getElementById('submit-guess-btn');
     submitBtn.disabled = true;
 
-    this.socket.emit('make-guess', { guess });
+    try {
+      const result = await this.socket.makeGuess(guess);
 
-    // Vider l'input
-    guessInput.value = '';
-    
-    // Réactiver le bouton après un délai
-    setTimeout(() => {
-      submitBtn.disabled = false;
-      guessInput.focus();
-    }, 500);
+      if (!result.success) {
+        UI.showToast(result.message || 'Tentative invalide', 'error');
+      }
+
+      // Vider l'input
+      guessInput.value = '';
+    } catch (error) {
+      console.error('Error making guess:', error);
+      UI.showToast('Erreur: ' + error.message, 'error');
+    } finally {
+      // Réactiver le bouton
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        guessInput.focus();
+      }, 500);
+    }
   }
 
   handleGuessResult(result) {
