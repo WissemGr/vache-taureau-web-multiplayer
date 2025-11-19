@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Node.js version
+        run: |
+          echo "Node.js: $(node --version)"
+          echo "npm: $(npm --version)"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Security audit
+        run: npm audit --audit-level=moderate || true
+
+  lint:
+    name: Code Quality
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for console.log statements
+        run: |
+          echo "Checking for debug statements..."
+          ! grep -r "console.log" server.js public/js/*.js || echo "Warning: console.log found"
+
+      - name: Validate package.json
+        run: |
+          echo "Validating package.json..."
+          node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'))"
+
+  build:
+    name: Build Check
+    runs-on: self-hosted
+    needs: [test, lint]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run build
+        run: npm run build
+
+      - name: Test server startup
+        timeout-minutes: 1
+        run: |
+          echo "Testing server startup..."
+          timeout 5s npm start || code=$?
+          if [ $code -eq 124 ]; then
+            echo "Server started successfully"
+            exit 0
+          else
+            echo "Server failed to start"
+            exit 1
+          fi
