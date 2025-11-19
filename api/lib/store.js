@@ -6,6 +6,9 @@ let redis = null;
 let useRedis = false;
 
 // Try to initialize Upstash Redis
+console.log('🔍 Redis URL present:', !!process.env.UPSTASH_REDIS_REST_URL);
+console.log('🔍 Redis TOKEN present:', !!process.env.UPSTASH_REDIS_REST_TOKEN);
+
 if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
   try {
     const { Redis } = require('@upstash/redis');
