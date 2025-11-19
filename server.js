@@ -280,6 +280,21 @@ app.get('/api/rooms', (req, res) => {
   res.json(roomList);
 });
 
+// REST API Routes (for Vercel serverless functions compatibility)
+const createRoomHandler = require('./api/rooms/create');
+const joinRoomHandler = require('./api/rooms/join');
+const listRoomsHandler = require('./api/rooms/list');
+const startGameHandler = require('./api/game/start');
+const guessHandler = require('./api/game/guess');
+const gameStateHandler = require('./api/game/state');
+
+app.post('/api/rooms/create', createRoomHandler);
+app.post('/api/rooms/join', joinRoomHandler);
+app.get('/api/rooms/list', listRoomsHandler);
+app.post('/api/game/start', startGameHandler);
+app.post('/api/game/guess', guessHandler);
+app.get('/api/game/state', gameStateHandler);
+
 // WebSocket Events
 io.on('connection', (socket) => {
   console.log(`👤 Nouveau joueur connecté: ${socket.id}`);

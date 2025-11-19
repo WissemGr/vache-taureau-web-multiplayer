@@ -25,16 +25,22 @@ module.exports = async (req, res) => {
       return res.status(404).json({ error: 'Room not found' });
     }
 
-    const result = room.gameInstance.startGame(playerId);
+    const success = room.gameInstance.startGame();
 
     // Update room state
     store.updateRoom(roomId, {
       game: room.gameInstance.getGameState()
     });
 
+    if (!success) {
+      return res.status(400).json({
+        error: 'Cannot start game - no players in room',
+        gameState: room.gameInstance.getGameState()
+      });
+    }
+
     return res.status(200).json({
-      success: result.success,
-      message: result.message,
+      success: true,
       gameState: room.gameInstance.getGameState()
     });
   } catch (error) {
