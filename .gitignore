@@ -43,3 +43,12 @@ build/
 
 # PM2
 .pm2/
+
+# CI/CD
+deploy/
+deploy.tar.gz
+*.artifact
+
+# Test files (keep test.js but ignore test artifacts)
+test-results/
+coverage-report/

@@ -281,8 +281,8 @@ class VacheTaureauClient {
         UI.showFeedback(message, 'success');
         UI.showToast(message, 'success');
       } else {
-        const { cows, bulls } = result.attempt;
-        const message = `${cows} 🐄 vache${cows > 1 ? 's' : ''}, ${bulls} 🐂 taureau${bulls > 1 ? 'x' : ''}`;
+        const { bulls, cows } = result.attempt;
+        const message = `${bulls} 🐂 taureau${bulls > 1 ? 'x' : ''}, ${cows} 🐄 vache${cows > 1 ? 's' : ''}`;
         UI.showFeedback(message, 'info');
       }
     }

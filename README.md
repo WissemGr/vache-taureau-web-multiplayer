@@ -1,5 +1,10 @@
 # 🐄🐂 Vache et Taureau Multijoueur
 
+[![CI](https://github.com/YOUR_USERNAME/vache-taureau/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/vache-taureau/actions/workflows/ci.yml)
+[![Deploy](https://github.com/YOUR_USERNAME/vache-taureau/actions/workflows/deploy.yml/badge.svg)](https://github.com/YOUR_USERNAME/vache-taureau/actions/workflows/deploy.yml)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Un jeu compétitif en temps réel basé sur le célèbre jeu "Bulls and Cows" (Vache et Taureau). Les joueurs s'affrontent pour deviner un nombre secret de 4 chiffres en un minimum de tentatives.
 
 ## 🎮 Fonctionnalités
@@ -197,6 +202,61 @@ calculateBullsAndCows(secret, guess) {
 // Score basé sur le nombre de tentatives
 score = Math.max(1000 - (tentatives - 1) * 100, 100);
 ```
+
+## 🔄 CI/CD avec GitHub Actions
+
+Ce projet utilise GitHub Actions pour l'intégration et le déploiement continus.
+
+### Workflows configurés
+
+#### 🧪 CI (Continuous Integration)
+Déclenché à chaque push ou pull request sur `main` ou `develop`.
+
+**Tests effectués :**
+- ✅ Tests unitaires sur Node.js 16.x, 18.x, 20.x
+- ✅ Vérification de la qualité du code
+- ✅ Validation du build
+- ✅ Test de démarrage du serveur
+- ✅ Audit de sécurité des dépendances
+
+**Fichier:** `.github/workflows/ci.yml`
+
+#### 🚀 Deploy (Déploiement)
+Déclenché lors de la publication d'une release.
+
+**Actions :**
+- 📦 Création d'un artifact de déploiement
+- ✅ Tests avant déploiement
+- 📤 Upload de l'artifact pour déploiement manuel
+
+**Fichier:** `.github/workflows/deploy.yml`
+
+#### 🔒 Dependency Review
+Analyse les dépendances dans les pull requests.
+
+**Vérifications :**
+- Détection de vulnérabilités
+- Vérification des licences
+- Identification des dépendances obsolètes
+
+**Fichier:** `.github/workflows/dependency-review.yml`
+
+### Utilisation locale
+
+```bash
+# Exécuter les tests comme dans CI
+npm test
+
+# Vérifier le build
+npm run build
+
+# Test de démarrage
+npm start
+```
+
+### Badges de statut
+
+Remplacez `YOUR_USERNAME` dans le README par votre nom d'utilisateur GitHub pour afficher les badges de statut des workflows.
 
 ## 🚀 Déploiement
 
