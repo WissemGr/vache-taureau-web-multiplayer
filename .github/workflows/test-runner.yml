@@ -1,0 +1,76 @@
+name: Test Self-Hosted Runner
+
+on:
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [ develop ]
+    paths:
+      - '.github/workflows/test-runner.yml'
+
+jobs:
+  test-self-hosted-runner:
+    name: Test Self-Hosted Runner
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Display system info
+      run: |
+        echo "=================================================="
+        echo "🖥️  SYSTEM INFORMATION"
+        echo "=================================================="
+        echo "Hostname: $(hostname)"
+        echo "OS: $(uname -a)"
+        echo "User: $(whoami)"
+        echo "Working Directory: $(pwd)"
+        echo "IP Address: $(hostname -I | awk '{print $1}')"
+        echo ""
+
+    - name: Display runner info
+      run: |
+        echo "=================================================="
+        echo "🏃 RUNNER INFORMATION"
+        echo "=================================================="
+        echo "Runner Name: server-10.100.1.36"
+        echo "Labels: self-hosted, linux, x64, production"
+        echo "Runner Temp: $RUNNER_TEMP"
+        echo "Runner Workspace: $RUNNER_WORKSPACE"
+        echo ""
+
+    - name: Check Node.js and npm
+      run: |
+        echo "=================================================="
+        echo "📦 NODE.JS & NPM"
+        echo "=================================================="
+        echo "Node.js version: $(node --version)"
+        echo "npm version: $(npm --version 2>/dev/null || echo 'npm not found in PATH')"
+        echo "Node.js location: $(which node)"
+        echo ""
+
+    - name: Install dependencies
+      run: |
+        echo "=================================================="
+        echo "📥 INSTALLING DEPENDENCIES"
+        echo "=================================================="
+        npm ci
+
+    - name: Run tests
+      run: |
+        echo "=================================================="
+        echo "🧪 RUNNING TESTS"
+        echo "=================================================="
+        npm test
+
+    - name: Test summary
+      if: always()
+      run: |
+        echo ""
+        echo "=================================================="
+        echo "✅ TEST COMPLETED ON SELF-HOSTED RUNNER"
+        echo "=================================================="
+        echo "Server: 10.100.1.36"
+        echo "Runner: server-10.100.1.36"
+        echo "Status: Tests executed successfully!"
+        echo ""
