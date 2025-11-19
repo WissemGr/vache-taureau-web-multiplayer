@@ -41,10 +41,12 @@ function createMockRes() {
 }
 
 describe('API Endpoints', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     // Clear store before each test
-    const rooms = store.getAllRooms();
-    rooms.forEach(room => store.deleteRoom(room.id));
+    const rooms = await store.getAllRooms();
+    for (const room of rooms) {
+      await store.deleteRoom(room.id);
+    }
   });
 
   describe('POST /api/rooms/create', () => {
@@ -120,7 +122,7 @@ describe('API Endpoints', () => {
     test('should join room successfully', async () => {
       // First create a room
       const game = new VacheTaureauGame('TEST-ROOM');
-      store.createRoom('TEST-ROOM', {
+      await store.createRoom('TEST-ROOM', {
         game: game.getGameState(),
         gameInstance: game
       });

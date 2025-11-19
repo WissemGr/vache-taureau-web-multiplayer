@@ -2,14 +2,16 @@ const VacheTaureauGame = require('./game-class');
 const store = require('./api/lib/store');
 
 describe('Integration Tests', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     // Clear store before each test
-    const rooms = store.getAllRooms();
-    rooms.forEach(room => store.deleteRoom(room.id));
+    const rooms = await store.getAllRooms();
+    for (const room of rooms) {
+      await store.deleteRoom(room.id);
+    }
   });
 
   describe('Complete game flow - Single player', () => {
-    test('should complete a full game with one player', () => {
+    test('should complete a full game with one player', async () => {
       // 1. Create game
       const roomId = 'INT-TEST-1';
       const game = new VacheTaureauGame(roomId);
@@ -53,7 +55,7 @@ describe('Integration Tests', () => {
   });
 
   describe('Complete game flow - Multiple players', () => {
-    test('should handle a competitive game with multiple players', () => {
+    test('should handle a competitive game with multiple players', async () => {
       // 1. Create game
       const game = new VacheTaureauGame('MULTI-GAME');
       game.secretNumber = '5678';
@@ -109,16 +111,16 @@ describe('Integration Tests', () => {
   });
 
   describe('Store integration with game', () => {
-    test('should manage room lifecycle with store', () => {
+    test('should manage room lifecycle with store', async () => {
       // 1. Create game and store it
       const game = new VacheTaureauGame('STORE-TEST');
-      store.createRoom('STORE-TEST', {
+      await store.createRoom('STORE-TEST', {
         game: game.getGameState(),
         gameInstance: game
       });
 
       // 2. Retrieve from store
-      let room = store.getRoom('STORE-TEST');
+      let room = await store.getRoom('STORE-TEST');
       expect(room).toBeDefined();
       expect(room.gameInstance).toBeDefined();
 
@@ -127,30 +129,30 @@ describe('Integration Tests', () => {
       room.gameInstance.addPlayer({ id: playerId }, 'TestPlayer');
 
       // 4. Add player to store
-      store.addPlayer(playerId, {
+      await store.addPlayer(playerId, {
         name: 'TestPlayer',
         roomId: 'STORE-TEST'
       });
 
       // 5. Update room state
-      store.updateRoom('STORE-TEST', {
+      await store.updateRoom('STORE-TEST', {
         game: room.gameInstance.getGameState()
       });
 
       // 6. Verify updates
-      room = store.getRoom('STORE-TEST');
+      room = await store.getRoom('STORE-TEST');
       expect(room.game.players).toHaveLength(1);
 
-      const player = store.getPlayer(playerId);
+      const player = await store.getPlayer(playerId);
       expect(player).toBeDefined();
       expect(player.name).toBe('TestPlayer');
 
       // 7. Cleanup
-      store.removePlayer(playerId);
-      store.deleteRoom('STORE-TEST');
+      await store.removePlayer(playerId);
+      await store.deleteRoom('STORE-TEST');
 
-      expect(store.getRoom('STORE-TEST')).toBeUndefined();
-      expect(store.getPlayer(playerId)).toBeUndefined();
+      expect(await store.getRoom('STORE-TEST')).toBeNull();
+      expect(await store.getPlayer(playerId)).toBeNull();
     });
   });
 
@@ -238,37 +240,37 @@ describe('Integration Tests', () => {
   });
 
   describe('Store cleanup functionality', () => {
-    test('should cleanup old rooms', () => {
+    test('should cleanup old rooms', async () => {
       // Create some rooms
-      store.createRoom('old-1', { test: true });
-      store.createRoom('old-2', { test: true });
-      store.createRoom('new-1', { test: true });
+      await store.createRoom('old-1', { test: true });
+      await store.createRoom('old-2', { test: true });
+      await store.createRoom('new-1', { test: true });
 
       // Manually set old timestamps
-      const old1 = store.getRoom('old-1');
-      const old2 = store.getRoom('old-2');
+      const old1 = await store.getRoom('old-1');
+      const old2 = await store.getRoom('old-2');
       old1.lastActivity = Date.now() - 7200000; // 2 hours ago
       old2.lastActivity = Date.now() - 5400000; // 1.5 hours ago
 
       // Cleanup rooms older than 1 hour
-      store.cleanup(3600000);
+      await store.cleanup(3600000);
 
       // Old rooms should be deleted
-      expect(store.getRoom('old-1')).toBeUndefined();
-      expect(store.getRoom('old-2')).toBeUndefined();
+      expect(await store.getRoom('old-1')).toBeNull();
+      expect(await store.getRoom('old-2')).toBeNull();
 
       // New room should remain
-      expect(store.getRoom('new-1')).toBeDefined();
+      expect(await store.getRoom('new-1')).toBeDefined();
     });
   });
 
   describe('Complete end-to-end scenario', () => {
-    test('should simulate a realistic game session', () => {
+    test('should simulate a realistic game session', async () => {
       const roomId = 'E2E-GAME';
 
       // 1. Room creation
       const game = new VacheTaureauGame(roomId);
-      store.createRoom(roomId, {
+      await store.createRoom(roomId, {
         game: game.getGameState(),
         gameInstance: game
       });
@@ -278,10 +280,10 @@ describe('Integration Tests', () => {
       const player2Id = 'player-2';
 
       game.addPlayer({ id: player1Id }, 'Alice');
-      store.addPlayer(player1Id, { name: 'Alice', roomId });
+      await store.addPlayer(player1Id, { name: 'Alice', roomId });
 
       game.addPlayer({ id: player2Id }, 'Bob');
-      store.addPlayer(player2Id, { name: 'Bob', roomId });
+      await store.addPlayer(player2Id, { name: 'Bob', roomId });
 
       // 3. Check room state before start
       let state = game.getGameState();
@@ -290,7 +292,7 @@ describe('Integration Tests', () => {
 
       // 4. Start game
       game.startGame();
-      store.updateRoom(roomId, { game: game.getGameState() });
+      await store.updateRoom(roomId, { game: game.getGameState() });
 
       state = game.getGameState();
       expect(state.canJoin).toBe(false);
@@ -321,11 +323,11 @@ describe('Integration Tests', () => {
       expect(state.players[1].rank).toBe(1); // Bob first
 
       // 10. Cleanup
-      store.removePlayer(player1Id);
-      store.removePlayer(player2Id);
-      store.deleteRoom(roomId);
+      await store.removePlayer(player1Id);
+      await store.removePlayer(player2Id);
+      await store.deleteRoom(roomId);
 
-      expect(store.getRoom(roomId)).toBeUndefined();
+      expect(await store.getRoom(roomId)).toBeNull();
     });
   });
 });
