@@ -22,7 +22,13 @@ class VacheTaureauClient {
   }
 
   setupSocket() {
-    this.socket = io();
+    this.socket = io({
+      transports: ['polling'], // Force polling for Vercel
+      upgrade: false, // Don't upgrade to WebSocket
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5
+    });
     
     this.socket.on('connect', () => {
       console.log('🟢 Connecté au serveur');

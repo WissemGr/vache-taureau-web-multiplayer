@@ -22,7 +22,11 @@ const io = socketIo(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
-  }
+  },
+  transports: ['polling'], // Force polling for Vercel compatibility
+  allowUpgrades: false, // Disable WebSocket upgrade
+  pingTimeout: 60000,
+  pingInterval: 25000
 });
 
 // Middleware
