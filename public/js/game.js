@@ -22,13 +22,8 @@ class VacheTaureauClient {
   }
 
   setupSocket() {
-    this.socket = io({
-      transports: ['polling'], // Force polling for Vercel
-      upgrade: false, // Don't upgrade to WebSocket
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionAttempts: 5
-    });
+    // Use API client instead of Socket.IO
+    this.socket = new APIClient();
     
     this.socket.on('connect', () => {
       console.log('🟢 Connecté au serveur');
@@ -157,9 +152,9 @@ class VacheTaureauClient {
   }
 
   // Gestion des rooms
-  joinRoom() {
+  async joinRoom() {
     const playerName = document.getElementById('player-name').value.trim();
-    const roomId = document.getElementById('room-id').value.trim() || this.generateRoomId();
+    const roomId = document.getElementById('room-id').value.trim();
 
     if (!playerName) {
       UI.showToast('Veuillez entrer votre nom', 'error');
@@ -171,23 +166,35 @@ class VacheTaureauClient {
       return;
     }
 
-    this.playerName = playerName;
-    this.currentRoom = roomId;
-
-    // Sauvegarder dans la session
-    if (window.sessionManager) {
-      window.sessionManager.updatePlayerName(playerName);
-      window.sessionManager.updateRoomInfo(roomId);
+    if (!roomId) {
+      UI.showToast('Veuillez entrer un ID de room', 'error');
+      return;
     }
 
-    this.socket.emit('join-room', { roomId, playerName });
-    
-    // Passer au lobby
-    UI.showScreen('lobby-screen');
-    this.updateLobbyInfo();
+    try {
+      const result = await this.socket.joinRoom(roomId, playerName);
+
+      if (result.success) {
+        this.playerName = playerName;
+        this.currentRoom = roomId;
+
+        // Save to session
+        if (window.sessionManager) {
+          window.sessionManager.updatePlayerName(playerName);
+          window.sessionManager.updateRoomInfo(roomId);
+        }
+
+        UI.showScreen('lobby-screen');
+        this.updateLobbyInfo();
+        UI.showToast('Vous avez rejoint la room !', 'success');
+      }
+    } catch (error) {
+      console.error('Error joining room:', error);
+      UI.showToast('Erreur: ' + error.message, 'error');
+    }
   }
 
-  createRoom() {
+  async createRoom() {
     const playerName = document.getElementById('player-name').value.trim();
 
     if (!playerName) {
@@ -195,11 +202,28 @@ class VacheTaureauClient {
       return;
     }
 
-    // Générer un nouvel ID de room
-    const roomId = this.generateRoomId();
-    document.getElementById('room-id').value = roomId;
-    
-    this.joinRoom();
+    try {
+      const result = await this.socket.createRoom(playerName);
+
+      if (result.success) {
+        this.currentRoom = result.roomId;
+        this.playerName = result.playerName;
+
+        // Save to session
+        if (window.sessionManager) {
+          window.sessionManager.updatePlayerName(playerName);
+          window.sessionManager.updateRoomInfo(result.roomId);
+        }
+
+        document.getElementById('room-id').value = result.roomId;
+        UI.showScreen('lobby-screen');
+        this.updateLobbyInfo();
+        UI.showToast('Room créée avec succès !', 'success');
+      }
+    } catch (error) {
+      console.error('Error creating room:', error);
+      UI.showToast('Erreur lors de la création de la room', 'error');
+    }
   }
 
   leaveRoom() {

@@ -22,6 +22,7 @@
   "author": "Wissem",
   "license": "MIT",
   "dependencies": {
+    "@upstash/redis": "^1.35.6",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

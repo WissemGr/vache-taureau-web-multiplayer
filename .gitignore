@@ -52,3 +52,4 @@ deploy.tar.gz
 # Test files (keep test.js but ignore test artifacts)
 test-results/
 coverage-report/
+.vercel
